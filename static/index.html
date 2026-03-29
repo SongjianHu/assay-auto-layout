@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Assay Auto-Layout</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --secondary: #64748b;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --radius: 8px;
+      --shadow: 0 1px 3px rgba(0,0,0,.1), 0 1px 2px rgba(0,0,0,.06);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    header {
+      background: var(--primary);
+      color: #fff;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      box-shadow: var(--shadow);
+    }
+    header h1 { font-size: 1.4rem; font-weight: 700; }
+    header p  { font-size: .875rem; opacity: .85; }
+
+    main {
+      max-width: 1100px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+      main { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+    }
+
+    .card h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      padding-bottom: .5rem;
+      border-bottom: 2px solid var(--primary);
+      color: var(--primary);
+    }
+
+    .step-badge {
+      display: inline-block;
+      background: var(--primary);
+      color: #fff;
+      border-radius: 999px;
+      font-size: .7rem;
+      font-weight: 700;
+      padding: 1px 8px;
+      margin-right: .4rem;
+    }
+
+    label {
+      display: block;
+      font-size: .875rem;
+      font-weight: 500;
+      margin-bottom: .35rem;
+      color: var(--text-muted);
+    }
+
+    textarea, input[type="text"], input[type="password"] {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: .6rem .75rem;
+      font-size: .875rem;
+      font-family: inherit;
+      color: var(--text);
+      background: #fff;
+      transition: border-color .15s;
+      resize: vertical;
+    }
+    textarea:focus, input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37,99,235,.15);
+    }
+
+    .hint {
+      font-size: .75rem;
+      color: var(--text-muted);
+      margin-top: .3rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      padding: .55rem 1.1rem;
+      border: none;
+      border-radius: var(--radius);
+      font-size: .875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s, transform .05s;
+    }
+    .btn:active { transform: scale(.98); }
+    .btn-primary  { background: var(--primary);   color: #fff; }
+    .btn-primary:hover  { background: var(--primary-dark); }
+    .btn-success  { background: var(--success);   color: #fff; }
+    .btn-success:hover  { background: #15803d; }
+    .btn-outline  { background: transparent; color: var(--primary); border: 1.5px solid var(--primary); }
+    .btn-outline:hover  { background: #eff6ff; }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    .btn-row { display: flex; gap: .75rem; flex-wrap: wrap; margin-top: 1rem; }
+
+    .status {
+      font-size: .82rem;
+      padding: .45rem .75rem;
+      border-radius: var(--radius);
+      margin-top: .75rem;
+      display: none;
+    }
+    .status.info    { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; display: block; }
+    .status.success { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; display: block; }
+    .status.error   { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; display: block; }
+    .status.loading { background: #f8fafc; color: var(--text-muted); border: 1px solid var(--border); display: block; }
+
+    .spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid currentColor;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      vertical-align: middle;
+      margin-right: .3rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    pre.json-preview {
+      background: #1e293b;
+      color: #e2e8f0;
+      border-radius: var(--radius);
+      padding: 1rem;
+      font-size: .78rem;
+      overflow: auto;
+      max-height: 260px;
+      margin-top: .75rem;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .full-width { grid-column: 1 / -1; }
+
+    .tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 1rem; }
+    .tab {
+      padding: .5rem 1rem;
+      font-size: .875rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none; background: none; color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: color .15s;
+    }
+    .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>📄 Assay Auto-Layout</h1>
+    <p>AI-powered academic paper template generator</p>
+  </div>
+</header>
+
+<main>
+
+  <!-- ── STEP 1: Parse Requirements ─────────────────────────────────────── -->
+  <div class="card">
+    <h2><span class="step-badge">1</span>Parse Formatting Requirements</h2>
+
+    <label for="apiKey">OpenAI API Key (optional)</label>
+    <input type="password" id="apiKey" placeholder="sk-… (leave blank to use server key or demo mode)" />
+    <p class="hint">Leave empty to use the <code>OPENAI_API_KEY</code> environment variable or receive a sensible default layout.</p>
+
+    <br/>
+    <label for="requirements">Formatting Requirements</label>
+    <textarea id="requirements" rows="8"
+      placeholder="Paste journal/paper formatting requirements here, e.g.:
+• Page size A4 (8.27 × 11.69 in), margins: top/bottom 1 in, left/right 1.25 in
+• Body text: Times New Roman 12 pt, 1.5 line spacing, justified
+• Title: 16 pt bold, centred
+• Two-column layout with 0.4 in gap
+• Footer with page number centred"></textarea>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btnParse">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/><path d="M12 8v4l3 3"/></svg>
+        Parse with AI
+      </button>
+    </div>
+    <div class="status" id="parseStatus"></div>
+  </div>
+
+  <!-- ── STEP 2: Review + Download Template ─────────────────────────────── -->
+  <div class="card">
+    <h2><span class="step-badge">2</span>Layout Configuration &amp; Template</h2>
+
+    <p class="hint" style="margin-bottom:.75rem">After parsing, review the extracted configuration and download the <code>.dotx</code> template.</p>
+
+    <pre class="json-preview" id="configPreview">(configuration will appear here after parsing)</pre>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btnGenTemplate" disabled>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+        Download .dotx Template
+      </button>
+    </div>
+    <div class="status" id="templateStatus"></div>
+  </div>
+
+  <!-- ── STEP 3: Export Paper ───────────────────────────────────────────── -->
+  <div class="card full-width">
+    <h2><span class="step-badge">3</span>Export Formatted Paper</h2>
+
+    <div class="tabs">
+      <button class="tab active" data-panel="markupHelp">Markup Guide</button>
+      <button class="tab" data-panel="contentInput">Paper Content</button>
+    </div>
+
+    <div class="tab-panel active" id="markupHelp">
+      <p class="hint" style="margin-bottom:.5rem">Use the following lightweight Markdown-like markup in your paper content:</p>
+      <pre class="json-preview" style="max-height:160px"># Paper Title              → Title style
+## 1. Introduction         → Heading 1
+### 1.1 Background         → Heading 2
+#### 1.1.1 Detail          → Heading 3
+Abstract                   → marks next paragraph as Abstract style
+References                 → marks following items as reference entries
+[1] Smith et al. …         → Reference item
+1. Smith et al. …          → Reference item (numbered list)
+(any other line)           → Normal body text</pre>
+    </div>
+
+    <div class="tab-panel" id="contentInput">
+      <label for="content">Paper Content</label>
+      <textarea id="content" rows="12"
+        placeholder="# My Research Paper
+
+Author Name, Affiliation
+
+Abstract
+This paper presents…
+
+## 1. Introduction
+Lorem ipsum dolor sit amet…
+
+## 2. Methods
+…
+
+## References
+[1] Smith, J. (2023). Example reference."></textarea>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-success" id="btnExport" disabled>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+        Export Formatted .docx
+      </button>
+    </div>
+    <div class="status" id="exportStatus"></div>
+  </div>
+
+</main>
+
+<script>
+// ── State ─────────────────────────────────────────────────────────────────
+let currentConfig = null;
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+function setStatus(id, type, msg) {
+  const el = document.getElementById(id);
+  el.className = 'status ' + type;
+  el.innerHTML = (type === 'loading' ? '<span class="spinner"></span>' : '') + msg;
+}
+
+function clearStatus(id) {
+  const el = document.getElementById(id);
+  el.className = 'status';
+  el.textContent = '';
+}
+
+async function apiFetch(url, body) {
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }));
+    throw new Error(err.detail || res.statusText);
+  }
+  return res;
+}
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const panelId = tab.dataset.panel;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(panelId).classList.add('active');
+  });
+});
+
+// ── Step 1: Parse ─────────────────────────────────────────────────────────
+document.getElementById('btnParse').addEventListener('click', async () => {
+  const requirements = document.getElementById('requirements').value.trim();
+  if (!requirements) { setStatus('parseStatus', 'error', 'Please enter formatting requirements.'); return; }
+
+  const btn = document.getElementById('btnParse');
+  btn.disabled = true;
+  setStatus('parseStatus', 'loading', 'Sending to AI parser…');
+
+  try {
+    const res = await apiFetch('/api/parse', {
+      requirements,
+      api_key: document.getElementById('apiKey').value.trim() || null
+    });
+    currentConfig = await res.json();
+    document.getElementById('configPreview').textContent = JSON.stringify(currentConfig, null, 2);
+    document.getElementById('btnGenTemplate').disabled = false;
+    document.getElementById('btnExport').disabled = false;
+    setStatus('parseStatus', 'success', '✓ Layout configuration extracted successfully.');
+  } catch (e) {
+    setStatus('parseStatus', 'error', '✗ ' + e.message);
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+// ── Step 2: Generate Template ─────────────────────────────────────────────
+document.getElementById('btnGenTemplate').addEventListener('click', async () => {
+  if (!currentConfig) return;
+  const btn = document.getElementById('btnGenTemplate');
+  btn.disabled = true;
+  setStatus('templateStatus', 'loading', 'Generating .dotx template…');
+
+  try {
+    const res = await apiFetch('/api/generate-template', { config: currentConfig });
+    const blob = await res.blob();
+    const filename = (currentConfig.title || 'template').replace(/\s+/g, '_') + '.dotx';
+    downloadBlob(blob, filename);
+    setStatus('templateStatus', 'success', '✓ Template downloaded: ' + filename);
+  } catch (e) {
+    setStatus('templateStatus', 'error', '✗ ' + e.message);
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+// ── Step 3: Export Paper ──────────────────────────────────────────────────
+document.getElementById('btnExport').addEventListener('click', async () => {
+  if (!currentConfig) return;
+  const content = document.getElementById('content').value.trim();
+  if (!content) { setStatus('exportStatus', 'error', 'Please enter paper content.'); return; }
+
+  const btn = document.getElementById('btnExport');
+  btn.disabled = true;
+  setStatus('exportStatus', 'loading', 'Exporting formatted paper…');
+
+  try {
+    const res = await apiFetch('/api/export', { content, config: currentConfig });
+    const blob = await res.blob();
+    const filename = (currentConfig.title || 'paper').replace(/\s+/g, '_') + '_paper.docx';
+    downloadBlob(blob, filename);
+    setStatus('exportStatus', 'success', '✓ Paper exported: ' + filename);
+  } catch (e) {
+    setStatus('exportStatus', 'error', '✗ ' + e.message);
+  } finally {
+    btn.disabled = false;
+  }
+});
+</script>
+</body>
+</html>
