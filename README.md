@@ -1,2 +1,2 @@
-# assay-auto-layout
-use nlp and python make assay auto layout
+# thesis-auto-layout
+use nlp and python make thesis auto layout
