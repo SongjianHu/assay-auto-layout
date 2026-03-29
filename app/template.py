@@ -161,7 +161,7 @@ def _add_columns(section, num_columns: int, spacing_inches: float) -> None:
         cols = OxmlElement("w:cols")
         sectPr.append(cols)
     cols.set(qn("w:num"), str(num_columns))
-    cols.set(qn("w:space"), str(int(spacing_inches * 914400 / 914400 * 720)))  # twips
+    cols.set(qn("w:space"), str(int(spacing_inches * 1440)))  # twips (1 inch = 1440 twips)
 
 
 def _docx_to_dotx(docx_bytes: bytes) -> bytes:
